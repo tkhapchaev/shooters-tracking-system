@@ -1,1 +1,1 @@
-# shooters-tracking-system
+# Система учёта прогресса стрелков

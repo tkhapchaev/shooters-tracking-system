@@ -81,14 +81,14 @@ namespace ShootersTrackingSystem.Migrations
                         {
                             Id = 1,
                             Name = "Admin",
-                            Password = "Admin",
+                            Password = "mGyd58jTJYJSftGdmF8p/w==$CSSN/KvfydtzYHbK47N3tufiZ72ka3UKD9lbNTwNe7c=",
                             UserRoleId = 1
                         },
                         new
                         {
                             Id = 2,
                             Name = "Instructor",
-                            Password = "Instructor",
+                            Password = "6J8GMK/woJ7lepQ57xBAOg==$T4+RE2fJQOWMTwFft7fz+bLL4+STjR07+XWrJcN/uWk=",
                             UserRoleId = 2
                         });
                 });

@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ShootersTrackingSystem.Database;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShootersTrackingSystem.Model.Dtos;
-using ShootersTrackingSystem.Model.Entities;
 using ShootersTrackingSystem.Model.Services;
 
 namespace ShootersTrackingSystem.Controllers;
@@ -17,8 +16,30 @@ public class ResultsController : ControllerBase
     {
         _resultsService = resultsService;
     }
+    
+    [HttpGet("my")]
+    [Authorize(Roles = "Admin,Instructor,Client")]
+    public async Task<ActionResult<ResultDto>> GetUserResults()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+        {
+            return Unauthorized("User id not found in token");
+        }
+        
+        var results = await _resultsService.GetResultsByUser(int.Parse(userId));
+
+        if (!results.Any())
+        {
+            return NotFound();
+        }
+        
+        return Ok(results);
+    }
 
     [HttpGet("byWeapon/{weaponId}")]
+    [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<IEnumerable<ResultDto>>> GetResultsByWeapon(int weaponId)
     {
         var results = await _resultsService.GetResultsByWeapon(weaponId);
@@ -32,6 +53,7 @@ public class ResultsController : ControllerBase
     }
     
     [HttpGet("byWeaponType/{weaponTypeId}")]
+    [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<IEnumerable<ResultDto>>> GetResultsByWeaponType(int weaponTypeId)
     {
         var results = await _resultsService.GetResultsByWeaponType(weaponTypeId);
@@ -45,6 +67,7 @@ public class ResultsController : ControllerBase
     }
 
     [HttpGet("byUser/{userId}")]
+    [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<IEnumerable<ResultDto>>> GetResultsByUser(int userId)
     {
         var results = await _resultsService.GetResultsByUser(userId);
@@ -58,6 +81,7 @@ public class ResultsController : ControllerBase
     }
 
     [HttpGet("byUserAndWeapon/{userId}/{weaponId}")]
+    [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<ResultDto>> GetResultsByUserAndWeapon(int userId, int weaponId)
     {
         var results = await _resultsService.GetResultsByUserAndWeapon(userId, weaponId);
@@ -71,6 +95,7 @@ public class ResultsController : ControllerBase
     }
 
     [HttpGet("byUserAndWeaponType/{userId}/{weaponTypeId}")]
+    [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<ResultDto>> GetResultsByUserAndWeaponType(int userId, int weaponTypeId)
     {
         var results = await _resultsService.GetResultsByUserAndWeaponType(userId, weaponTypeId);

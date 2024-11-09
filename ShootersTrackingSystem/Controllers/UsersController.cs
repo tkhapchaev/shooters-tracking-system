@@ -1,20 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
 using ShootersTrackingSystem.Model.Dtos;
 using ShootersTrackingSystem.Model.Entities;
+using ShootersTrackingSystem.Model.Services;
 
 namespace ShootersTrackingSystem.Controllers;
 
+[Authorize(Roles = "Admin")]
 [Route("api/users")]
 [ApiController]
 public class UsersController : ControllerBase
 {
     private readonly DatabaseRepository _databaseRepository;
+    private readonly AuthService _authService;
 
-    public UsersController(DatabaseRepository databaseRepository)
+    public UsersController(DatabaseRepository databaseRepository, AuthService authService)
     {
         _databaseRepository = databaseRepository;
+        _authService = authService;
     }
 
     [HttpGet]
@@ -49,7 +54,7 @@ public class UsersController : ControllerBase
         user = new User
         {
             Name = userDto.Name,
-            Password = userDto.Password,
+            Password = _authService.HashPassword(userDto.Password),
             UserRoleId = userDto.UserRoleId
         };
 
@@ -84,7 +89,7 @@ public class UsersController : ControllerBase
         }
         
         user.Name = userDto.Name;
-        user.Password = userDto.Password;
+        user.Password = _authService.HashPassword(userDto.Password);
         userDto.UserRoleId = user.UserRoleId;
         
         try

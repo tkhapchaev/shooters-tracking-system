@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Model.Entities;
+using ShootersTrackingSystem.Model.Services;
 
 namespace ShootersTrackingSystem.Database;
 
@@ -36,13 +37,16 @@ public class DatabaseRepository : DbContext
             .HasOne(attempt => attempt.Weapon)
             .WithMany()
             .HasForeignKey(attempt => attempt.WeaponId);
+
+        const string adminHashedPassword = "mGyd58jTJYJSftGdmF8p/w==$CSSN/KvfydtzYHbK47N3tufiZ72ka3UKD9lbNTwNe7c=";
+        const string instructorHashedPassword = "6J8GMK/woJ7lepQ57xBAOg==$T4+RE2fJQOWMTwFft7fz+bLL4+STjR07+XWrJcN/uWk=";
         
         var adminRole = new UserRole { Id = 1, Name = "Admin" };
         var instructorRole = new UserRole { Id = 2, Name = "Instructor" };
         var clientRole = new UserRole { Id = 3, Name = "Client" };
         
-        var admin = new User { Id = 1, Name = "Admin", Password = "Admin", UserRoleId = 1 };
-        var instructor = new User { Id = 2, Name = "Instructor", Password = "Instructor", UserRoleId = 2 };
+        var admin = new User { Id = 1, Name = "Admin", Password = adminHashedPassword, UserRoleId = 1 };
+        var instructor = new User { Id = 2, Name = "Instructor", Password = instructorHashedPassword, UserRoleId = 2 };
         
         var pistol = new WeaponType { Id = 1, Name = "Pistol" };
         var rifle = new WeaponType { Id = 2, Name = "Rifle" };

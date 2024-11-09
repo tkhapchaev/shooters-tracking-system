@@ -134,8 +134,8 @@ namespace ShootersTrackingSystem.Migrations
                 columns: new[] { "Id", "Name", "Password", "UserRoleId" },
                 values: new object[,]
                 {
-                    { 1, "Admin", "Admin", 1 },
-                    { 2, "Instructor", "Instructor", 2 }
+                    { 1, "Admin", "mGyd58jTJYJSftGdmF8p/w==$CSSN/KvfydtzYHbK47N3tufiZ72ka3UKD9lbNTwNe7c=", 1 },
+                    { 2, "Instructor", "6J8GMK/woJ7lepQ57xBAOg==$T4+RE2fJQOWMTwFft7fz+bLL4+STjR07+XWrJcN/uWk=", 2 }
                 });
 
             migrationBuilder.CreateIndex(

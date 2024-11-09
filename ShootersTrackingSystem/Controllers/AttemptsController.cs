@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
 using ShootersTrackingSystem.Model.Dtos;
@@ -6,6 +7,7 @@ using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Controllers;
 
+[Authorize(Roles = "Admin,Instructor")]
 [Route("api/attempts")]
 [ApiController]
 public class AttemptsController : ControllerBase

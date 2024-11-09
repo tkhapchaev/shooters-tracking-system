@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
 using ShootersTrackingSystem.Model.Dtos;
@@ -18,15 +19,24 @@ public class WeaponTypesController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<IEnumerable<WeaponType>>> GetWeaponTypes()
     {
         return await _databaseRepository.WeaponTypes.ToListAsync();
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<WeaponType>> CreateWeaponType(WeaponTypeDto weaponTypeDto)
     {
-        var weaponType = new WeaponType
+        var weaponType = await _databaseRepository.WeaponTypes.FirstOrDefaultAsync(wt => wt.Name == weaponTypeDto.Name);
+
+        if (weaponType is not null)
+        {
+            return BadRequest();
+        }
+        
+        weaponType = new WeaponType
         {
             Name = weaponTypeDto.Name
         };
@@ -45,6 +55,7 @@ public class WeaponTypesController : ControllerBase
     }
     
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<WeaponType>> GetWeaponType(int id)
     {
         var weaponType = await _databaseRepository.WeaponTypes.FindAsync(id);
@@ -58,6 +69,7 @@ public class WeaponTypesController : ControllerBase
     }
     
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateWeaponType(int id, WeaponTypeDto weaponTypeDto)
     {
         var weaponType = await _databaseRepository.WeaponTypes.FindAsync(id);
@@ -88,6 +100,7 @@ public class WeaponTypesController : ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteWeaponType(int id)
     {
         var weaponType = await _databaseRepository.WeaponTypes.FindAsync(id);

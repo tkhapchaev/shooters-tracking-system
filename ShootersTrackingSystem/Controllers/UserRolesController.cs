@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
 using ShootersTrackingSystem.Model.Dtos;
@@ -6,6 +7,7 @@ using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Controllers;
 
+[Authorize(Roles = "Admin")]
 [Route("api/users/roles")]
 [ApiController]
 public class UserRolesController : ControllerBase
@@ -26,7 +28,14 @@ public class UserRolesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserRole>> CreateRole(UserRoleDto userRoleDto)
     {
-        var userRole = new UserRole
+        var userRole = await _databaseRepository.UserRoles.FirstOrDefaultAsync(ur => ur.Name == userRoleDto.Name);
+
+        if (userRole is not null)
+        {
+            return BadRequest();
+        }
+        
+        userRole = new UserRole
         {
             Name = userRoleDto.Name
         };

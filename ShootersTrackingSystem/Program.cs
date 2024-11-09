@@ -1,19 +1,46 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ShootersTrackingSystem;
 using ShootersTrackingSystem.Database;
 
 var builder = WebApplication.CreateBuilder(args);
+var key = Encoding.ASCII.GetBytes(builder.Configuration["Keys:JwtSecretKey"] ?? throw new ArgumentNullException("JwtSecretKey"));
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+        };
+    });
 
 var startup = new Startup(builder.Configuration);
 startup.ConfigureServices(builder.Services);
 
-var app = builder.Build();
+var application = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+using (var scope = application.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseRepository>();
-    dbContext.Database.Migrate();
+    var repository = scope.ServiceProvider.GetRequiredService<DatabaseRepository>();
+    repository.Database.Migrate();
 }
 
-startup.Configure(app, builder.Environment);
-app.Run();
+startup.Configure(application, builder.Environment);
+
+application.UseHttpsRedirection();
+application.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+application.MapControllers();
+application.Run();

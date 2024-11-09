@@ -111,7 +111,7 @@ public class ResultsService
             var attemptsOrdered = attempts.OrderByDescending(attempt => attempt.Score).Take(NumberOfBestAttemptsByUser);
             var total = attemptsOrdered.Sum(attempt => attempt.Score);
             
-            results.Add(new ResultDto { Username = weapon.Name, Description = weapon.Name, Score = (ulong)total });
+            results.Add(new ResultDto { Username = user.Name, Description = weapon.Name, Score = (ulong)total });
         }
         
         var resultsOrdered = results.OrderByDescending(result => result.Score);

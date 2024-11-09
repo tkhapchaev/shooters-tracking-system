@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using ShootersTrackingSystem.Database;
 using ShootersTrackingSystem.Model.Services;
 
@@ -15,22 +16,54 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddDbContext<DatabaseRepository>(options => options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<DatabaseRepository>(options => options.UseNpgsql(_configuration.GetConnectionString("database")));
         services.AddControllers();
+        
+        services.AddScoped<AuthService>();
         services.AddScoped<ResultsService>();
-        services.AddSwaggerGen();
+        
+        services.AddDistributedMemoryCache();
+        
+        services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                BearerFormat = "JWT",
+                Scheme = "bearer"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] { }
+                }
+            });
+        });
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder application, IWebHostEnvironment env)
     {
         if (env.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ShootersTrackingSystem API V1"));
+            application.UseDeveloperExceptionPage();
+            application.UseSwagger();
+            application.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "ShootersTrackingSystem API V1"));
         }
 
-        app.UseRouting();
-        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        application.UseRouting();
+        application.UseAuthentication();
+        application.UseAuthorization();
+        application.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }
 }

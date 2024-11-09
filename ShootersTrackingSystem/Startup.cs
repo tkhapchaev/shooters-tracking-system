@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
+using ShootersTrackingSystem.Model.Services;
 
 namespace ShootersTrackingSystem;
 
@@ -14,8 +15,9 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<DatabaseRepository>(options => options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection")));
         services.AddControllers();
+        services.AddScoped<ResultsService>();
         services.AddSwaggerGen();
     }
 

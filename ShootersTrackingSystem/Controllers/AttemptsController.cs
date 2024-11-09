@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Entities;
-using ShootersTrackingSystem.Models;
+using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Controllers;
 
@@ -10,17 +10,17 @@ namespace ShootersTrackingSystem.Controllers;
 [ApiController]
 public class AttemptsController : ControllerBase
 {
-    private readonly DatabaseContext _databaseContext;
+    private readonly DatabaseRepository _databaseRepository;
 
-    public AttemptsController(DatabaseContext databaseContext)
+    public AttemptsController(DatabaseRepository databaseRepository)
     {
-        _databaseContext = databaseContext;
+        _databaseRepository = databaseRepository;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Attempt>>> GetAttempts()
     {
-        return await _databaseContext.Attempts
+        return await _databaseRepository.Attempts
             .Include(attempt => attempt.User)
             .Include(attempt => attempt.Weapon)
             .ToListAsync();
@@ -36,17 +36,24 @@ public class AttemptsController : ControllerBase
             Score = attemptDto.Score,
             DateTime = DateTime.UtcNow
         };
-        
-        _databaseContext.Attempts.Add(attempt);
-        await _databaseContext.SaveChangesAsync();
-        
+
+        try
+        {
+            _databaseRepository.Attempts.Add(attempt);
+            await _databaseRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
         return CreatedAtAction(nameof(GetAttempt), new { id = attempt.Id }, attempt);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Attempt>> GetAttempt(int id)
     {
-        var attempt = await _databaseContext.Attempts
+        var attempt = await _databaseRepository.Attempts
             .Include(a => a.User)
             .Include(a => a.Weapon)
             .FirstOrDefaultAsync(a => a.Id == id);
@@ -62,7 +69,7 @@ public class AttemptsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAttempt(int id, AttemptDto attemptDto)
     {
-        var attempt = await _databaseContext.Attempts.FindAsync(id);
+        var attempt = await _databaseRepository.Attempts.FindAsync(id);
     
         if (attempt is null)
         {
@@ -72,21 +79,20 @@ public class AttemptsController : ControllerBase
         attempt.UserId = attemptDto.UserId;
         attempt.WeaponId = attemptDto.WeaponId;
         attempt.Score = attemptDto.Score;
-        
-        _databaseContext.Entry(attempt).State = EntityState.Modified;
 
         try
         {
-            await _databaseContext.SaveChangesAsync();
+            _databaseRepository.Entry(attempt).State = EntityState.Modified;
+            await _databaseRepository.SaveChangesAsync();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (Exception e)
         {
             if (!AttemptExists(id))
             {
                 return NotFound();
             }
             
-            throw;
+            return BadRequest(e.Message);
         }
 
         return NoContent();
@@ -95,21 +101,21 @@ public class AttemptsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAttempt(int id)
     {
-        var attempt = await _databaseContext.Attempts.FindAsync(id);
+        var attempt = await _databaseRepository.Attempts.FindAsync(id);
         
         if (attempt is null)
         {
             return NotFound();
         }
 
-        _databaseContext.Attempts.Remove(attempt);
-        await _databaseContext.SaveChangesAsync();
+        _databaseRepository.Attempts.Remove(attempt);
+        await _databaseRepository.SaveChangesAsync();
 
         return NoContent();
     }
 
     private bool AttemptExists(int id)
     {
-        return _databaseContext.Attempts.Any(attempt => attempt.Id == id);
+        return _databaseRepository.Attempts.Any(attempt => attempt.Id == id);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ShootersTrackingSystem.Entities;
+namespace ShootersTrackingSystem.Model.Entities;
 
 public class WeaponType
 {

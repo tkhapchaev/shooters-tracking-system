@@ -1,4 +1,4 @@
-﻿namespace ShootersTrackingSystem.Models;
+﻿namespace ShootersTrackingSystem.Model.Dtos;
 
 public class AttemptDto
 {

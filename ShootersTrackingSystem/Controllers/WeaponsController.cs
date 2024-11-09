@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Entities;
-using ShootersTrackingSystem.Models;
+using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Controllers;
 
@@ -10,17 +10,17 @@ namespace ShootersTrackingSystem.Controllers;
 [ApiController]
 public class WeaponsController : ControllerBase
 {
-    private readonly DatabaseContext _databaseContext;
+    private readonly DatabaseRepository _databaseRepository;
 
-    public WeaponsController(DatabaseContext databaseContext)
+    public WeaponsController(DatabaseRepository databaseRepository)
     {
-        _databaseContext = databaseContext;
+        _databaseRepository = databaseRepository;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Weapon>>> GetWeapons()
     {
-        return await _databaseContext.Weapons.Include(weapon => weapon.WeaponType).ToListAsync();
+        return await _databaseRepository.Weapons.Include(weapon => weapon.WeaponType).ToListAsync();
     }
 
     [HttpPost]
@@ -31,17 +31,24 @@ public class WeaponsController : ControllerBase
             Name = weaponDto.Name,
             WeaponTypeId = weaponDto.WeaponTypeId
         };
-        
-        _databaseContext.Weapons.Add(weapon);
-        await _databaseContext.SaveChangesAsync();
-        
+
+        try
+        {
+            _databaseRepository.Weapons.Add(weapon);
+            await _databaseRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
         return CreatedAtAction(nameof(GetWeapons), new { id = weapon.Id }, weapon);
     }
     
     [HttpGet("{id}")]
     public async Task<ActionResult<Weapon>> GetWeapon(int id)
     {
-        var weapon = await _databaseContext.Weapons.Include(w => w.WeaponType).FirstOrDefaultAsync(w => w.Id == id);
+        var weapon = await _databaseRepository.Weapons.Include(w => w.WeaponType).FirstOrDefaultAsync(w => w.Id == id);
 
         if (weapon is null)
         {
@@ -54,7 +61,7 @@ public class WeaponsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateWeapon(int id, WeaponDto weaponDto)
     {
-        var weapon = await _databaseContext.Weapons.FindAsync(id);
+        var weapon = await _databaseRepository.Weapons.FindAsync(id);
         
         if (weapon is null)
         {
@@ -63,21 +70,20 @@ public class WeaponsController : ControllerBase
 
         weapon.Name = weaponDto.Name;
         weapon.WeaponTypeId = weaponDto.WeaponTypeId;
-        
-        _databaseContext.Entry(weapon).State = EntityState.Modified;
 
         try
         {
-            await _databaseContext.SaveChangesAsync();
+            _databaseRepository.Entry(weapon).State = EntityState.Modified;
+            await _databaseRepository.SaveChangesAsync();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (Exception e)
         {
             if (!WeaponExists(id))
             {
                 return NotFound();
             }
             
-            throw;
+            return BadRequest(e.Message);
         }
 
         return NoContent();
@@ -86,21 +92,21 @@ public class WeaponsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteWeapon(int id)
     {
-        var weapon = await _databaseContext.Weapons.FindAsync(id);
+        var weapon = await _databaseRepository.Weapons.FindAsync(id);
         
         if (weapon is null)
         {
             return NotFound();
         }
 
-        _databaseContext.Weapons.Remove(weapon);
-        await _databaseContext.SaveChangesAsync();
+        _databaseRepository.Weapons.Remove(weapon);
+        await _databaseRepository.SaveChangesAsync();
 
         return NoContent();
     }
 
     private bool WeaponExists(int id)
     {
-        return _databaseContext.Weapons.Any(weapon => weapon.Id == id);
+        return _databaseRepository.Weapons.Any(weapon => weapon.Id == id);
     }
 }

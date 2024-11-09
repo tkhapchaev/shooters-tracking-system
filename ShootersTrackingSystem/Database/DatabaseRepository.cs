@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ShootersTrackingSystem.Entities;
+using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Database;
 
-public class DatabaseContext : DbContext
+public class DatabaseRepository : DbContext
 {
     public DbSet<Attempt> Attempts { get; set; }
     public DbSet<User> Users { get; set; }
@@ -11,7 +11,7 @@ public class DatabaseContext : DbContext
     public DbSet<Weapon> Weapons { get; set; }
     public DbSet<WeaponType> WeaponTypes { get; set; }
 
-    public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+    public DatabaseRepository(DbContextOptions<DatabaseRepository> options) : base(options)
     {
     }
 

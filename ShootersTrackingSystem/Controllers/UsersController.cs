@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Entities;
-using ShootersTrackingSystem.Models;
+using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Controllers;
 
@@ -10,23 +10,23 @@ namespace ShootersTrackingSystem.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
-    private readonly DatabaseContext _databaseContext;
+    private readonly DatabaseRepository _databaseRepository;
 
-    public UsersController(DatabaseContext databaseContext)
+    public UsersController(DatabaseRepository databaseRepository)
     {
-        _databaseContext = databaseContext;
+        _databaseRepository = databaseRepository;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<User>>> GetUsers()
     {
-        return await _databaseContext.Users.Include(user => user.UserRole).ToListAsync();
+        return await _databaseRepository.Users.Include(user => user.UserRole).ToListAsync();
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> GetUser(int id)
     {
-        var user = await _databaseContext.Users.Include(u => u.UserRole).FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _databaseRepository.Users.Include(u => u.UserRole).FirstOrDefaultAsync(u => u.Id == id);
         
         if (user is null)
         {
@@ -39,7 +39,7 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<User>> CreateUser(UserDto userDto)
     {
-        var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Name == userDto.Name);
+        var user = await _databaseRepository.Users.FirstOrDefaultAsync(u => u.Name == userDto.Name);
 
         if (user is not null)
         {
@@ -52,24 +52,31 @@ public class UsersController : ControllerBase
             Password = userDto.Password,
             UserRoleId = userDto.UserRoleId
         };
-        
-        _databaseContext.Users.Add(user);
-        await _databaseContext.SaveChangesAsync();
-        
+
+        try
+        {
+            _databaseRepository.Users.Add(user);
+            await _databaseRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
         return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateUser(int id, UserDto userDto)
     {
-        var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Name == userDto.Name);
+        var user = await _databaseRepository.Users.FirstOrDefaultAsync(u => u.Name == userDto.Name);
 
         if (user is not null)
         {
             return BadRequest();
         }
         
-        user = await _databaseContext.Users.FindAsync(id);
+        user = await _databaseRepository.Users.FindAsync(id);
         
         if (user is null)
         {
@@ -80,20 +87,19 @@ public class UsersController : ControllerBase
         user.Password = userDto.Password;
         userDto.UserRoleId = user.UserRoleId;
         
-        _databaseContext.Entry(user).State = EntityState.Modified;
-
         try
         {
-            await _databaseContext.SaveChangesAsync();
+            _databaseRepository.Entry(user).State = EntityState.Modified;
+            await _databaseRepository.SaveChangesAsync();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (Exception e)
         {
             if (!UserExists(id))
             {
                 return NotFound();
             }
             
-            throw;
+            return BadRequest(e.Message);
         }
 
         return NoContent();
@@ -102,21 +108,21 @@ public class UsersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        var user = await _databaseContext.Users.FindAsync(id);
+        var user = await _databaseRepository.Users.FindAsync(id);
         
         if (user is null)
         {
             return NotFound();
         }
 
-        _databaseContext.Users.Remove(user);
-        await _databaseContext.SaveChangesAsync();
+        _databaseRepository.Users.Remove(user);
+        await _databaseRepository.SaveChangesAsync();
         
         return NoContent();
     }
 
     private bool UserExists(int id)
     {
-        return _databaseContext.Users.Any(user => user.Id == id);
+        return _databaseRepository.Users.Any(user => user.Id == id);
     }
 }

@@ -1,0 +1,7 @@
+﻿cd {PROJECT_DIR}
+dotnet tool install --global dotnet-ef
+dotnet restore
+dotnet ef --version
+dotnet ef migrations add UpdateModels
+dotnet ef database update
+echo {STATUS}

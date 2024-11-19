@@ -33,7 +33,7 @@ var application = builder.Build();
 
 using (var scope = application.Services.CreateScope())
 {
-    var repository = scope.ServiceProvider.GetRequiredService<DatabaseRepository>();
+    var repository = scope.ServiceProvider.GetRequiredService<ShootersDbContext>();
     repository.Database.Migrate();
 }
 

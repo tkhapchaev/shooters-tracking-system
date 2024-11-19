@@ -1,37 +1,34 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Dto;
 
 namespace ShootersTrackingSystem.Model.Services;
 
 public class ResultsService
 {
     private const int NumberOfBestAttemptsByUser = 3;
-    private readonly DatabaseRepository _databaseRepository;
+    private readonly ShootersDbContext _shootersDbContext;
 
-    public ResultsService(DatabaseRepository databaseRepository)
+    public ResultsService(ShootersDbContext shootersDbContext)
     {
-        _databaseRepository = databaseRepository;
+        _shootersDbContext = shootersDbContext;
     }
     
     public async Task<IEnumerable<ResultDto>> GetResultsByWeapon(int weaponId)
     {
-        var weapon = await _databaseRepository.Weapons.FindAsync(weaponId);
+        var weapon = await _shootersDbContext.Weapons.FindAsync(weaponId);
 
         if (weapon is null)
         {
             return new List<ResultDto>();
         }
         
-        var users = await _databaseRepository.Users.Include(user => user.UserRole).ToListAsync();
+        var users = await _shootersDbContext.Users.Include(user => user.UserRole).ToListAsync();
         var results = new List<ResultDto>();
         
         foreach (var user in users)
         {
-            var attempts = await _databaseRepository.Attempts
-                .Where(attempt => attempt.UserId == user.Id)
-                .Where(attempt => attempt.WeaponId == weaponId)
-                .ToListAsync();
+            var attempts = await _shootersDbContext.Attempts.Where(attempt => attempt.UserId == user.Id).Where(attempt => attempt.WeaponId == weaponId).ToListAsync();
 
             if (attempts.Count == 0)
             {
@@ -51,22 +48,19 @@ public class ResultsService
     
     public async Task<IEnumerable<ResultDto>> GetResultsByWeaponType(int weaponTypeId)
     {
-        var weaponType = await _databaseRepository.WeaponTypes.FindAsync(weaponTypeId);
+        var weaponType = await _shootersDbContext.WeaponTypes.FindAsync(weaponTypeId);
 
         if (weaponType is null)
         {
             return new List<ResultDto>();
         }
         
-        var users = await _databaseRepository.Users.Include(user => user.UserRole).ToListAsync();
+        var users = await _shootersDbContext.Users.Include(user => user.UserRole).ToListAsync();
         var results = new List<ResultDto>();
         
         foreach (var user in users)
         {
-            var attempts = await _databaseRepository.Attempts
-                .Where(attempt => attempt.UserId == user.Id)
-                .Where(attempt => attempt.Weapon.WeaponTypeId == weaponTypeId)
-                .ToListAsync();
+            var attempts = await _shootersDbContext.Attempts.Where(attempt => attempt.UserId == user.Id).Where(attempt => attempt.Weapon.WeaponTypeId == weaponTypeId).ToListAsync();
 
             if (attempts.Count == 0)
             {
@@ -86,22 +80,19 @@ public class ResultsService
     
     public async Task<IEnumerable<ResultDto>> GetResultsByUser(int userId)
     {
-        var user = await _databaseRepository.Users.FindAsync(userId);
+        var user = await _shootersDbContext.Users.FindAsync(userId);
 
         if (user is null)
         {
             return new List<ResultDto>();
         }
         
-        var weapons = await _databaseRepository.Weapons.Include(weapon => weapon.WeaponType).ToListAsync();
+        var weapons = await _shootersDbContext.Weapons.Include(weapon => weapon.WeaponType).ToListAsync();
         var results = new List<ResultDto>();
         
         foreach (var weapon in weapons)
         {
-            var attempts = await _databaseRepository.Attempts
-                .Where(attempt => attempt.UserId == userId)
-                .Where(attempt => attempt.WeaponId == weapon.Id)
-                .ToListAsync();
+            var attempts = await _shootersDbContext.Attempts.Where(attempt => attempt.UserId == userId).Where(attempt => attempt.WeaponId == weapon.Id).ToListAsync();
 
             if (attempts.Count == 0)
             {
@@ -121,24 +112,21 @@ public class ResultsService
     
     public async Task<ResultDto> GetResultsByUserAndWeapon(int userId, int weaponId)
     {
-        var user = await _databaseRepository.Users.FindAsync(userId);
+        var user = await _shootersDbContext.Users.FindAsync(userId);
 
         if (user is null)
         {
             return new ResultDto();
         }
         
-        var weapon = await _databaseRepository.Weapons.FindAsync(weaponId);
+        var weapon = await _shootersDbContext.Weapons.FindAsync(weaponId);
 
         if (weapon is null)
         {
             return new ResultDto();
         }
         
-        var attempts = await _databaseRepository.Attempts
-            .Where(attempt => attempt.UserId == userId)
-            .Where(attempt => attempt.WeaponId == weaponId)
-            .ToListAsync();
+        var attempts = await _shootersDbContext.Attempts.Where(attempt => attempt.UserId == userId).Where(attempt => attempt.WeaponId == weaponId).ToListAsync();
 
         if (attempts.Count == 0)
         {
@@ -153,24 +141,21 @@ public class ResultsService
     
     public async Task<ResultDto> GetResultsByUserAndWeaponType(int userId, int weaponTypeId)
     {
-        var user = await _databaseRepository.Users.FindAsync(userId);
+        var user = await _shootersDbContext.Users.FindAsync(userId);
 
         if (user is null)
         {
             return new ResultDto();
         }
         
-        var weaponType = await _databaseRepository.WeaponTypes.FindAsync(weaponTypeId);
+        var weaponType = await _shootersDbContext.WeaponTypes.FindAsync(weaponTypeId);
 
         if (weaponType is null)
         {
             return new ResultDto();
         }
         
-        var attempts = await _databaseRepository.Attempts
-            .Where(attempt => attempt.UserId == userId)
-            .Where(attempt => attempt.Weapon.WeaponTypeId == weaponTypeId)
-            .ToListAsync();
+        var attempts = await _shootersDbContext.Attempts.Where(attempt => attempt.UserId == userId).Where(attempt => attempt.Weapon.WeaponTypeId == weaponTypeId).ToListAsync();
 
         if (attempts.Count == 0)
         {

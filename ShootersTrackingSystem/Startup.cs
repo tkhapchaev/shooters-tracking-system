@@ -16,7 +16,7 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddDbContext<DatabaseRepository>(options => options.UseNpgsql(_configuration.GetConnectionString("database")));
+        services.AddDbContext<ShootersDbContext>(options => options.UseNpgsql(_configuration.GetConnectionString("database")));
         services.AddControllers();
         
         services.AddScoped<AuthService>();

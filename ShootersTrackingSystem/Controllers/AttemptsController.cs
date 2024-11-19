@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Dto;
 using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Controllers;
@@ -12,17 +12,17 @@ namespace ShootersTrackingSystem.Controllers;
 [ApiController]
 public class AttemptsController : ControllerBase
 {
-    private readonly DatabaseRepository _databaseRepository;
+    private readonly ShootersDbContext _shootersDbContext;
 
-    public AttemptsController(DatabaseRepository databaseRepository)
+    public AttemptsController(ShootersDbContext shootersDbContext)
     {
-        _databaseRepository = databaseRepository;
+        _shootersDbContext = shootersDbContext;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Attempt>>> GetAttempts()
     {
-        return await _databaseRepository.Attempts
+        return await _shootersDbContext.Attempts
             .Include(attempt => attempt.User)
             .Include(attempt => attempt.Weapon)
             .ToListAsync();
@@ -41,8 +41,8 @@ public class AttemptsController : ControllerBase
 
         try
         {
-            _databaseRepository.Attempts.Add(attempt);
-            await _databaseRepository.SaveChangesAsync();
+            _shootersDbContext.Attempts.Add(attempt);
+            await _shootersDbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -55,7 +55,7 @@ public class AttemptsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Attempt>> GetAttempt(int id)
     {
-        var attempt = await _databaseRepository.Attempts
+        var attempt = await _shootersDbContext.Attempts
             .Include(a => a.User)
             .Include(a => a.Weapon)
             .FirstOrDefaultAsync(a => a.Id == id);
@@ -71,7 +71,7 @@ public class AttemptsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAttempt(int id, AttemptDto attemptDto)
     {
-        var attempt = await _databaseRepository.Attempts.FindAsync(id);
+        var attempt = await _shootersDbContext.Attempts.FindAsync(id);
     
         if (attempt is null)
         {
@@ -84,8 +84,8 @@ public class AttemptsController : ControllerBase
 
         try
         {
-            _databaseRepository.Entry(attempt).State = EntityState.Modified;
-            await _databaseRepository.SaveChangesAsync();
+            _shootersDbContext.Entry(attempt).State = EntityState.Modified;
+            await _shootersDbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -103,21 +103,21 @@ public class AttemptsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAttempt(int id)
     {
-        var attempt = await _databaseRepository.Attempts.FindAsync(id);
+        var attempt = await _shootersDbContext.Attempts.FindAsync(id);
         
         if (attempt is null)
         {
             return NotFound();
         }
 
-        _databaseRepository.Attempts.Remove(attempt);
-        await _databaseRepository.SaveChangesAsync();
+        _shootersDbContext.Attempts.Remove(attempt);
+        await _shootersDbContext.SaveChangesAsync();
 
         return NoContent();
     }
 
     private bool AttemptExists(int id)
     {
-        return _databaseRepository.Attempts.Any(attempt => attempt.Id == id);
+        return _shootersDbContext.Attempts.Any(attempt => attempt.Id == id);
     }
 }

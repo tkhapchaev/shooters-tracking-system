@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Dto;
 using ShootersTrackingSystem.Model.Services;
 
 namespace ShootersTrackingSystem.Controllers;

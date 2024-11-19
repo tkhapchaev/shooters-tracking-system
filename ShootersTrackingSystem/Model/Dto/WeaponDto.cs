@@ -1,4 +1,4 @@
-﻿namespace ShootersTrackingSystem.Model.Dtos;
+﻿namespace ShootersTrackingSystem.Model.Dto;
 
 public class WeaponDto
 {

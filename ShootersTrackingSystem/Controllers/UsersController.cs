@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Dto;
 using ShootersTrackingSystem.Model.Entities;
 using ShootersTrackingSystem.Model.Services;
 
@@ -13,25 +13,25 @@ namespace ShootersTrackingSystem.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
-    private readonly DatabaseRepository _databaseRepository;
+    private readonly ShootersDbContext _shootersDbContext;
     private readonly AuthService _authService;
 
-    public UsersController(DatabaseRepository databaseRepository, AuthService authService)
+    public UsersController(ShootersDbContext shootersDbContext, AuthService authService)
     {
-        _databaseRepository = databaseRepository;
+        _shootersDbContext = shootersDbContext;
         _authService = authService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<User>>> GetUsers()
     {
-        return await _databaseRepository.Users.Include(user => user.UserRole).ToListAsync();
+        return await _shootersDbContext.Users.Include(user => user.UserRole).ToListAsync();
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> GetUser(int id)
     {
-        var user = await _databaseRepository.Users.Include(u => u.UserRole).FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _shootersDbContext.Users.Include(u => u.UserRole).FirstOrDefaultAsync(u => u.Id == id);
         
         if (user is null)
         {
@@ -44,7 +44,7 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<User>> CreateUser(UserDto userDto)
     {
-        var user = await _databaseRepository.Users.FirstOrDefaultAsync(u => u.Name == userDto.Name);
+        var user = await _shootersDbContext.Users.FirstOrDefaultAsync(u => u.Name == userDto.Name);
 
         if (user is not null)
         {
@@ -60,8 +60,8 @@ public class UsersController : ControllerBase
 
         try
         {
-            _databaseRepository.Users.Add(user);
-            await _databaseRepository.SaveChangesAsync();
+            _shootersDbContext.Users.Add(user);
+            await _shootersDbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -74,14 +74,14 @@ public class UsersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateUser(int id, UserDto userDto)
     {
-        var user = await _databaseRepository.Users.FirstOrDefaultAsync(u => u.Name == userDto.Name);
+        var user = await _shootersDbContext.Users.FirstOrDefaultAsync(u => u.Name == userDto.Name);
 
         if (user is not null)
         {
             return BadRequest();
         }
         
-        user = await _databaseRepository.Users.FindAsync(id);
+        user = await _shootersDbContext.Users.FindAsync(id);
         
         if (user is null)
         {
@@ -94,8 +94,8 @@ public class UsersController : ControllerBase
         
         try
         {
-            _databaseRepository.Entry(user).State = EntityState.Modified;
-            await _databaseRepository.SaveChangesAsync();
+            _shootersDbContext.Entry(user).State = EntityState.Modified;
+            await _shootersDbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -113,21 +113,21 @@ public class UsersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        var user = await _databaseRepository.Users.FindAsync(id);
+        var user = await _shootersDbContext.Users.FindAsync(id);
         
         if (user is null)
         {
             return NotFound();
         }
 
-        _databaseRepository.Users.Remove(user);
-        await _databaseRepository.SaveChangesAsync();
+        _shootersDbContext.Users.Remove(user);
+        await _shootersDbContext.SaveChangesAsync();
         
         return NoContent();
     }
 
     private bool UserExists(int id)
     {
-        return _databaseRepository.Users.Any(user => user.Id == id);
+        return _shootersDbContext.Users.Any(user => user.Id == id);
     }
 }

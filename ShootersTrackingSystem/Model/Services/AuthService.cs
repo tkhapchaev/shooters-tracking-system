@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Dto;
 
 namespace ShootersTrackingSystem.Model.Services;
 
@@ -14,17 +14,17 @@ public class AuthService
 {
     private const int TokenExpirationHours = 24;
     private readonly IConfiguration _configuration;
-    private readonly DatabaseRepository _databaseRepository;
+    private readonly ShootersDbContext _shootersDbContext;
 
-    public AuthService(IConfiguration configuration, DatabaseRepository databaseRepository)
+    public AuthService(IConfiguration configuration, ShootersDbContext shootersDbContext)
     {
         _configuration = configuration;
-        _databaseRepository = databaseRepository;
+        _shootersDbContext = shootersDbContext;
     }
     
     public async Task<AuthResponseDto?> Authenticate(string username, string password)
     {
-        var user = await _databaseRepository.Users.Include(u => u.UserRole).FirstOrDefaultAsync(u => u.Name == username);
+        var user = await _shootersDbContext.Users.Include(u => u.UserRole).FirstOrDefaultAsync(u => u.Name == username);
         
         if (user is null)
         {

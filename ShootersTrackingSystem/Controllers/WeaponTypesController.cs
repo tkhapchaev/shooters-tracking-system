@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Dto;
 using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Controllers;
@@ -11,25 +11,25 @@ namespace ShootersTrackingSystem.Controllers;
 [ApiController]
 public class WeaponTypesController : ControllerBase
 {
-    private readonly DatabaseRepository _databaseRepository;
+    private readonly ShootersDbContext _shootersDbContext;
 
-    public WeaponTypesController(DatabaseRepository databaseRepository)
+    public WeaponTypesController(ShootersDbContext shootersDbContext)
     {
-        _databaseRepository = databaseRepository;
+        _shootersDbContext = shootersDbContext;
     }
 
     [HttpGet]
     [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<IEnumerable<WeaponType>>> GetWeaponTypes()
     {
-        return await _databaseRepository.WeaponTypes.ToListAsync();
+        return await _shootersDbContext.WeaponTypes.ToListAsync();
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<WeaponType>> CreateWeaponType(WeaponTypeDto weaponTypeDto)
     {
-        var weaponType = await _databaseRepository.WeaponTypes.FirstOrDefaultAsync(wt => wt.Name == weaponTypeDto.Name);
+        var weaponType = await _shootersDbContext.WeaponTypes.FirstOrDefaultAsync(wt => wt.Name == weaponTypeDto.Name);
 
         if (weaponType is not null)
         {
@@ -43,8 +43,8 @@ public class WeaponTypesController : ControllerBase
 
         try
         {
-            _databaseRepository.WeaponTypes.Add(weaponType);
-            await _databaseRepository.SaveChangesAsync();
+            _shootersDbContext.WeaponTypes.Add(weaponType);
+            await _shootersDbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -58,7 +58,7 @@ public class WeaponTypesController : ControllerBase
     [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<WeaponType>> GetWeaponType(int id)
     {
-        var weaponType = await _databaseRepository.WeaponTypes.FindAsync(id);
+        var weaponType = await _shootersDbContext.WeaponTypes.FindAsync(id);
 
         if (weaponType is null)
         {
@@ -72,7 +72,7 @@ public class WeaponTypesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateWeaponType(int id, WeaponTypeDto weaponTypeDto)
     {
-        var weaponType = await _databaseRepository.WeaponTypes.FindAsync(id);
+        var weaponType = await _shootersDbContext.WeaponTypes.FindAsync(id);
         
         if (weaponType is null)
         {
@@ -83,8 +83,8 @@ public class WeaponTypesController : ControllerBase
 
         try
         {
-            _databaseRepository.Entry(weaponType).State = EntityState.Modified;
-            await _databaseRepository.SaveChangesAsync();
+            _shootersDbContext.Entry(weaponType).State = EntityState.Modified;
+            await _shootersDbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -103,21 +103,21 @@ public class WeaponTypesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteWeaponType(int id)
     {
-        var weaponType = await _databaseRepository.WeaponTypes.FindAsync(id);
+        var weaponType = await _shootersDbContext.WeaponTypes.FindAsync(id);
         
         if (weaponType is null)
         {
             return NotFound();
         }
 
-        _databaseRepository.WeaponTypes.Remove(weaponType);
-        await _databaseRepository.SaveChangesAsync();
+        _shootersDbContext.WeaponTypes.Remove(weaponType);
+        await _shootersDbContext.SaveChangesAsync();
 
         return NoContent();
     }
     
     private bool WeaponTypeExists(int id)
     {
-        return _databaseRepository.WeaponTypes.Any(weaponType => weaponType.Id == id);
+        return _shootersDbContext.WeaponTypes.Any(weaponType => weaponType.Id == id);
     }
 }

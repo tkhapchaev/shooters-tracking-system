@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Dto;
 using ShootersTrackingSystem.Model.Services;
 
 namespace ShootersTrackingSystem.Controllers;
@@ -38,7 +38,7 @@ public class ResultsController : ControllerBase
         return Ok(results);
     }
 
-    [HttpGet("byWeapon/{weaponId}")]
+    [HttpGet("by/weapon/{weaponId}")]
     [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<IEnumerable<ResultDto>>> GetResultsByWeapon(int weaponId)
     {
@@ -52,7 +52,7 @@ public class ResultsController : ControllerBase
         return Ok(results);
     }
     
-    [HttpGet("byWeaponType/{weaponTypeId}")]
+    [HttpGet("by/weapontype/{weaponTypeId}")]
     [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<IEnumerable<ResultDto>>> GetResultsByWeaponType(int weaponTypeId)
     {
@@ -66,7 +66,7 @@ public class ResultsController : ControllerBase
         return Ok(results);
     }
 
-    [HttpGet("byUser/{userId}")]
+    [HttpGet("by/user/{userId}")]
     [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<IEnumerable<ResultDto>>> GetResultsByUser(int userId)
     {
@@ -80,7 +80,7 @@ public class ResultsController : ControllerBase
         return Ok(results);
     }
 
-    [HttpGet("byUserAndWeapon/{userId}/{weaponId}")]
+    [HttpGet("by/userandweapon/{userId}/{weaponId}")]
     [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<ResultDto>> GetResultsByUserAndWeapon(int userId, int weaponId)
     {
@@ -94,7 +94,7 @@ public class ResultsController : ControllerBase
         return Ok(results);
     }
 
-    [HttpGet("byUserAndWeaponType/{userId}/{weaponTypeId}")]
+    [HttpGet("by/userandweapontype/{userId}/{weaponTypeId}")]
     [Authorize(Roles = "Admin,Instructor")]
     public async Task<ActionResult<ResultDto>> GetResultsByUserAndWeaponType(int userId, int weaponTypeId)
     {

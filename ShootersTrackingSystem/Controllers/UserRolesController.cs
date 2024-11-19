@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShootersTrackingSystem.Database;
-using ShootersTrackingSystem.Model.Dtos;
+using ShootersTrackingSystem.Model.Dto;
 using ShootersTrackingSystem.Model.Entities;
 
 namespace ShootersTrackingSystem.Controllers;
@@ -12,23 +12,23 @@ namespace ShootersTrackingSystem.Controllers;
 [ApiController]
 public class UserRolesController : ControllerBase
 {
-    private readonly DatabaseRepository _databaseRepository;
+    private readonly ShootersDbContext _shootersDbContext;
 
-    public UserRolesController(DatabaseRepository databaseRepository)
+    public UserRolesController(ShootersDbContext shootersDbContext)
     {
-        _databaseRepository = databaseRepository;
+        _shootersDbContext = shootersDbContext;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserRole>>> GetRoles()
     {
-        return await _databaseRepository.UserRoles.ToListAsync();
+        return await _shootersDbContext.UserRoles.ToListAsync();
     }
 
     [HttpPost]
     public async Task<ActionResult<UserRole>> CreateRole(UserRoleDto userRoleDto)
     {
-        var userRole = await _databaseRepository.UserRoles.FirstOrDefaultAsync(ur => ur.Name == userRoleDto.Name);
+        var userRole = await _shootersDbContext.UserRoles.FirstOrDefaultAsync(ur => ur.Name == userRoleDto.Name);
 
         if (userRole is not null)
         {
@@ -42,8 +42,8 @@ public class UserRolesController : ControllerBase
 
         try
         {
-            _databaseRepository.UserRoles.Add(userRole);
-            await _databaseRepository.SaveChangesAsync();
+            _shootersDbContext.UserRoles.Add(userRole);
+            await _shootersDbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -56,7 +56,7 @@ public class UserRolesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserRole>> GetRole(int id)
     {
-        var role = await _databaseRepository.UserRoles.FindAsync(id);
+        var role = await _shootersDbContext.UserRoles.FindAsync(id);
 
         if (role is null)
         {
@@ -69,7 +69,7 @@ public class UserRolesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateRole(int id, UserRoleDto userRoleDto)
     {
-        var userRole = await _databaseRepository.UserRoles.FindAsync(id);
+        var userRole = await _shootersDbContext.UserRoles.FindAsync(id);
         
         if (userRole is null)
         {
@@ -80,8 +80,8 @@ public class UserRolesController : ControllerBase
 
         try
         {
-            _databaseRepository.Entry(userRole).State = EntityState.Modified;
-            await _databaseRepository.SaveChangesAsync();
+            _shootersDbContext.Entry(userRole).State = EntityState.Modified;
+            await _shootersDbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -99,21 +99,21 @@ public class UserRolesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRole(int id)
     {
-        var role = await _databaseRepository.UserRoles.FindAsync(id);
+        var role = await _shootersDbContext.UserRoles.FindAsync(id);
         
         if (role is null)
         {
             return NotFound();
         }
 
-        _databaseRepository.UserRoles.Remove(role);
-        await _databaseRepository.SaveChangesAsync();
+        _shootersDbContext.UserRoles.Remove(role);
+        await _shootersDbContext.SaveChangesAsync();
 
         return NoContent();
     }
 
     private bool RoleExists(int id)
     {
-        return _databaseRepository.UserRoles.Any(userRole => userRole.Id == id);
+        return _shootersDbContext.UserRoles.Any(userRole => userRole.Id == id);
     }
 }

@@ -39,7 +39,7 @@ public class ResultsController : ControllerBase
     }
 
     [HttpGet("by/weapon/{weaponId}")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "Admin,Instructor,Client")]
     public async Task<ActionResult<IEnumerable<ResultDto>>> GetResultsByWeapon(int weaponId)
     {
         var results = await _resultsService.GetResultsByWeapon(weaponId);
@@ -53,7 +53,7 @@ public class ResultsController : ControllerBase
     }
     
     [HttpGet("by/weapontype/{weaponTypeId}")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "Admin,Instructor,Client")]
     public async Task<ActionResult<IEnumerable<ResultDto>>> GetResultsByWeaponType(int weaponTypeId)
     {
         var results = await _resultsService.GetResultsByWeaponType(weaponTypeId);

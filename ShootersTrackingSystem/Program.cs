@@ -44,3 +44,5 @@ application.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 application.MapControllers();
 application.Run();
+
+public partial class Program { }

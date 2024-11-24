@@ -19,7 +19,7 @@ public class WeaponTypesController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "Admin,Instructor,Client")]
     public async Task<ActionResult<IEnumerable<WeaponType>>> GetWeaponTypes()
     {
         return await _shootersDbContext.WeaponTypes.ToListAsync();
